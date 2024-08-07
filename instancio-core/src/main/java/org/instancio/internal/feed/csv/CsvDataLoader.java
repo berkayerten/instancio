@@ -17,13 +17,11 @@ package org.instancio.internal.feed.csv;
 
 import org.instancio.feed.DataSource;
 import org.instancio.internal.feed.DataLoader;
-import org.instancio.settings.FeedDataTrim;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * A very basic CSV parser does not support quoted values
@@ -31,15 +29,10 @@ import java.util.regex.Pattern;
  */
 public final class CsvDataLoader implements DataLoader<List<String[]>> {
 
-    private final FeedDataTrim feedDataTrim;
     private final String commentChar;
-    private final Pattern delimiterMatcher;
 
     CsvDataLoader(final InternalCsvFormatOptions formatOptions) {
-        this.feedDataTrim = formatOptions.getFeedDataTrim();
         this.commentChar = formatOptions.getCommentPrefix();
-        this.delimiterMatcher = Pattern.compile(
-                String.valueOf(formatOptions.getDelimiter()), Pattern.LITERAL);
     }
 
     @Override
@@ -55,17 +48,45 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
                 if (line.isEmpty() || line.startsWith(commentChar)) {
                     continue;
                 }
-                final String[] tokens = delimiterMatcher.split(line);
-                for (int i = 0; i < tokens.length; i++) {
-                    final String val = feedDataTrim == FeedDataTrim.NONE
-                            ? tokens[i]
-                            : tokens[i].trim();
-
-                    tokens[i] = val.isEmpty() ? null : val; // NOPMD
-                }
+                final String[] tokens = parseLine(line);
                 results.add(tokens);
             }
             return results;
         }
+    }
+
+    private static String[] parseLine(String line) {
+        List<String> tokens = new ArrayList<>();
+        StringBuilder currentToken = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+
+            if (c == '"') {
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                    currentToken.append(c);
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (c == ',' && !inQuotes) {
+                tokens.add(trimQuotes(currentToken.toString().trim()));
+                currentToken.setLength(0);
+            } else {
+                if (!inQuotes && Character.isWhitespace(c)) continue;
+                currentToken.append(c);
+            }
+        }
+
+        tokens.add(trimQuotes(currentToken.toString().trim()));
+        return tokens.toArray(new String[0]);
+    }
+
+    private static String trimQuotes(String token) {
+        if (token.startsWith("\"") && token.endsWith("\"")) {
+            token = token.substring(1, token.length() - 1);
+        }
+        return token.replace("\"\"", "\"");
     }
 }
