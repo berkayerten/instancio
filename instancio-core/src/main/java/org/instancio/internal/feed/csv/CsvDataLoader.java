@@ -44,7 +44,7 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
             final List<String[]> results = new ArrayList<>();
 
             String line;
-            while ((line = br.readLine()) != null) { //NOPMD
+            while ((line = br.readLine()) != null) { // NOPMD
                 if (line.isEmpty() || line.startsWith(commentChar)) {
                     continue;
                 }
@@ -66,7 +66,7 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
             if (c == '"') {
                 if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
                     currentToken.append(c);
-                    i++;
+                    i++; // NOPMD
                 } else {
                     inQuotes = !inQuotes;
                 }
@@ -86,9 +86,10 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
     }
 
     private static String trimQuotes(String token) {
-        if (token.startsWith("\"") && token.endsWith("\"")) {
-            token = token.substring(1, token.length() - 1);
+        String result = token;
+        if (result.startsWith("\"") && result.endsWith("\"")) {
+            result = result.substring(1, result.length() - 1);
         }
-        return token.replace("\"\"", "\"");
+        return result.replace("\"\"", "\"");
     }
 }
