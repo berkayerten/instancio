@@ -74,7 +74,9 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
                 tokens.add(trimQuotes(currentToken.toString().trim()));
                 currentToken.setLength(0);
             } else {
-                if (!inQuotes && Character.isWhitespace(c)) continue;
+                if (!inQuotes && Character.isWhitespace(c)) {
+                    continue;
+                }
                 currentToken.append(c);
             }
         }
