@@ -1,4 +1,4 @@
-package org.instancio.test.features.feed;
+package org.instancio.test.jackson.feed;
 
 import org.instancio.Instancio;
 import org.instancio.junit.InstancioExtension;
@@ -26,7 +26,7 @@ class FeedFormatQuotedCsvParserTest {
     }
 
     @Test
-    void sampleFeed(){
+    void sampleQuotedFeed() {
         FeedFormatQuotedCsvParserTest.SampleFeed feed = Instancio.createFeed(FeedFormatQuotedCsvParserTest.SampleFeed.class);
         assertThat(feed.col1().get()).isEqualTo("a,b");
         assertThat(feed.col2().get()).isEqualTo("c");
