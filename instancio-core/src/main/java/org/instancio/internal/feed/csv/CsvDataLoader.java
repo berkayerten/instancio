@@ -77,29 +77,26 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
                     inQuotes = !inQuotes;
                 }
             } else if (charAt == delimiter && !inQuotes) {
-                final String val = feedDataTrim == FeedDataTrim.NONE
-                        ? currentToken.toString()
-                        : currentToken.toString().trim();
-                final String val2 = val.isEmpty() ? null : val;
-                tokens.add(trimQuotes(val2));
+                tokens.add(processToken(currentToken.toString()));
                 currentToken.setLength(0);
             } else {
                 currentToken.append(charAt);
             }
         }
-        final String val = feedDataTrim == FeedDataTrim.NONE
-                ? currentToken.toString()
-                : currentToken.toString().trim();
-        final String val2 = val.isEmpty() ? null : val;
-        tokens.add(trimQuotes(val2));
+        tokens.add(processToken(currentToken.toString()));
         return tokens.toArray(new String[0]);
     }
 
+    private String processToken(String token) {
+        String trimmedToken = feedDataTrim == FeedDataTrim.NONE ? token : token.trim();
+        String finalToken = trimmedToken.isEmpty() ? null : trimQuotes(trimmedToken);
+        return finalToken;
+    }
+
     private static String trimQuotes(String token) {
-        String result = token;
-        if (result.startsWith("\"") && result.endsWith("\"")) {
-            result = result.substring(1, result.length() - 1);
+        if (token.startsWith("\"") && token.endsWith("\"")) {
+            token = token.substring(1, token.length() - 1);
         }
-        return result.replace("\"\"", "\"");
+        return token.replace("\"\"", "\"");
     }
 }
