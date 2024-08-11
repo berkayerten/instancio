@@ -23,7 +23,6 @@ import org.instancio.settings.Keys;
 import org.instancio.test.support.tags.Feature;
 import org.instancio.test.support.tags.FeatureTag;
 import org.instancio.test.support.util.Constants;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -39,7 +38,7 @@ import static org.instancio.Instancio.gen;
 @ExtendWith(InstancioExtension.class)
 class FeedFormatCsvTest {
 
-    private static final Character[] SEPARATORS = "`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?".chars()
+    private static final Character[] SEPARATORS = "`~!@#$%^&*()-_=+[{]}\\|;:',<.>/?".chars()
             .mapToObj(i -> (char) i)
             .toArray(Character[]::new);
 
