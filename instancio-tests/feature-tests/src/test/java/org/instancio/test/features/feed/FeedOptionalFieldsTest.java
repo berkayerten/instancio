@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @FeatureTag(Feature.FEED)
 @ExtendWith(InstancioExtension.class)
-@Disabled
 class FeedOptionalFieldsTest {
 
     @Feed.Source

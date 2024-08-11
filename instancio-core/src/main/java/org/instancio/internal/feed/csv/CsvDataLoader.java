@@ -25,8 +25,7 @@ import java.util.List;
 import org.instancio.settings.FeedDataTrim;
 
 /**
- * A very basic CSV parser does not support quoted values
- * or escape characters.
+ * A very basic CSV parser does not support escape characters.
  */
 public final class CsvDataLoader implements DataLoader<List<String[]>> {
 
@@ -89,8 +88,7 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
 
     private String processToken(String token) {
         String trimmedToken = feedDataTrim == FeedDataTrim.NONE ? token : token.trim();
-        String finalToken = trimmedToken.isEmpty() ? null : trimQuotes(trimmedToken);
-        return finalToken;
+        return trimmedToken.isEmpty() ? null : trimQuotes(trimmedToken);
     }
 
     private static String trimQuotes(String token) {

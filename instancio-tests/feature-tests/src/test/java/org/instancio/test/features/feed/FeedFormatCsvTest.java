@@ -44,8 +44,6 @@ class FeedFormatCsvTest {
             .toArray(Character[]::new);
 
     @RepeatedTest(Constants.SAMPLE_SIZE_DDD)
-            @Disabled
-//    @Test
     void csvWithTrimmedValue() {
         final FeedDataTrim dataTrim = gen().enumOf(FeedDataTrim.class).get();
         final char separator = gen().oneOf(SEPARATORS).get();
@@ -86,7 +84,6 @@ class FeedFormatCsvTest {
     }
 
     @Test
-    @Disabled
     void markdownTable() {
         final String md = "\n" +
                 "| id | code | desc            |\n" +
