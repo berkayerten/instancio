@@ -93,7 +93,7 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
 
     private static String trimQuotes(String token) {
         if (token.startsWith("\"") && token.endsWith("\"")) {
-            token = token.substring(1, token.length() - 1);
+            token = token.substring(1, token.length() - 1); //NOPMD
         }
         return token.replace("\"\"", "\"");
     }
