@@ -15,7 +15,6 @@
  */
 package org.instancio.test.features.feed;
 
-import org.instancio.Instancio;
 import org.instancio.feed.Feed;
 import org.instancio.junit.InstancioExtension;
 import org.instancio.settings.FeedDataTrim;
@@ -31,8 +30,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static java.lang.Character.UnicodeBlock.GENERAL_PUNCTUATION;
 import static java.lang.Character.UnicodeBlock.SUPPLEMENTAL_PUNCTUATION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Fail.fail;
 import static org.instancio.Instancio.gen;
+import static org.instancio.Instancio.ofFeed;
 
 @FeatureTag(Feature.FEED)
 @ExtendWith(InstancioExtension.class)
@@ -52,16 +53,9 @@ class FeedFormatCsvTest {
 
         final String data = createCsv(commentPrefix, separator);
 
-        final Feed result = Instancio.ofFeed(Feed.class)
-                .withDataSource(source -> source.ofString(data))
-                .formatOptions(format -> format.csv()
-                        .commentPrefix(commentPrefix)
-                        .delimiter(separator)
-                        .trim(dataTrim))
-                .create();
+        final Feed result = getFeed(data, commentPrefix, separator, dataTrim);
 
         if (dataTrim == FeedDataTrim.NONE) {
-            System.out.println(result.toString());
             assertThat(result.stringSpec(" x ").get()).isEqualTo(" 1 ");
             assertThat(result.stringSpec(" y ").get()).isEqualTo(" 2 ");
         } else if (dataTrim == FeedDataTrim.UNQUOTED) {
@@ -90,7 +84,7 @@ class FeedFormatCsvTest {
                 "| 1  | ABC  | Great widget    |\n" +
                 "| 2  | FGH  | Awesome product |\n";
 
-        final Feed result = Instancio.ofFeed(Feed.class)
+        final Feed result = ofFeed(Feed.class)
                 .withDataSource(source -> source.ofString(md))
                 .formatOptions(format -> format.csv()
                         .commentPrefix("|-")
@@ -111,7 +105,7 @@ class FeedFormatCsvTest {
 
         @Test
         void disableTrimViaSettings() {
-            final Feed feed = Instancio.ofFeed(Feed.class)
+            final Feed feed = ofFeed(Feed.class)
                     .withDataSource(source -> source.ofString("value\n  foo  "))
                     .withSetting(Keys.FEED_DATA_TRIM, FeedDataTrim.NONE)
                     .create();
@@ -121,7 +115,7 @@ class FeedFormatCsvTest {
 
         @Test
         void disableTrimViaSettings_withFormatOptionsWithoutTrimSpecified() {
-            final Feed feed = Instancio.ofFeed(Feed.class)
+            final Feed feed = ofFeed(Feed.class)
                     .withDataSource(source -> source.ofString("value\n  foo  "))
                     .withSetting(Keys.FEED_DATA_TRIM, FeedDataTrim.NONE)
                     .formatOptions(format -> format.csv().delimiter(','))
@@ -132,7 +126,7 @@ class FeedFormatCsvTest {
 
         @Test
         void overrideTrimSettingViaFormatOptions() {
-            final Feed feed = Instancio.ofFeed(Feed.class)
+            final Feed feed = ofFeed(Feed.class)
                     .withDataSource(source -> source.ofString("value\n  foo  "))
                     .withSetting(Keys.FEED_DATA_TRIM, FeedDataTrim.NONE)
                     .formatOptions(format -> format.csv().delimiter(',').trim(FeedDataTrim.UNQUOTED))
@@ -140,5 +134,30 @@ class FeedFormatCsvTest {
 
             assertThat(feed.stringSpec("value").get()).isEqualTo("foo");
         }
+    }
+
+    @Test
+    void csvWithInvalidDelimeter() {
+        final FeedDataTrim dataTrim = gen().enumOf(FeedDataTrim.class).get();
+        final char separator = '"';
+        final String commentPrefix = gen().string().length(1, 3)
+                .unicode(GENERAL_PUNCTUATION, SUPPLEMENTAL_PUNCTUATION)
+                .get();
+
+        final String data = createCsv(commentPrefix, separator);
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> getFeed(data, commentPrefix, separator, dataTrim))
+                .withMessage("Invalid delimiter: \"");
+    }
+
+    private static Feed getFeed(String data, String commentPrefix, char separator, FeedDataTrim dataTrim) {
+        return ofFeed(Feed.class)
+                .withDataSource(source -> source.ofString(data))
+                .formatOptions(format -> format.csv()
+                        .commentPrefix(commentPrefix)
+                        .delimiter(separator)
+                        .trim(dataTrim))
+                .create();
     }
 }
