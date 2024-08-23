@@ -67,43 +67,36 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
         List<String> tokens = new ArrayList<>();
         StringBuilder currentToken = new StringBuilder();
         boolean charInQuotes = false;
-        boolean tokenInQuotes = false;
-        boolean quotedToken = false;
+        boolean tokenQuoted = false;
         int i = 0;
         while (i < line.length()) {
             char charAt = line.charAt(i);
 
             if (charAt == '"') {
-                quotedToken = true;
+                tokenQuoted = true;
                 if (charInQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
                     currentToken.append(charAt);
                     i++;
                 } else {
                     charInQuotes = !charInQuotes;
-                    tokenInQuotes = !tokenInQuotes;
-                    if (charInQuotes)currentToken.setLength(0);
+                    if (charInQuotes) {
+                        currentToken.setLength(0);
+                    }
                 }
             } else if (charAt == delimiter && !charInQuotes) {
-                tokenInQuotes = false;
-                quotedToken = false;
-                tokens.add(trimToken(currentToken.toString(), tokenInQuotes));
+                tokenQuoted = false;
+                tokens.add(trimToken(currentToken.toString(), charInQuotes));
                 currentToken.setLength(0);
             } else if (charAt == ' ') {
-                if (charInQuotes) {
+                if (charInQuotes || (feedDataTrim == NONE && !tokenQuoted)) {
                     currentToken.append(charAt);
-                } else {
-                    if (feedDataTrim == NONE && !quotedToken) {
-                        currentToken.append(charAt);
-                        }
-                    }
+                }
             } else {
                 currentToken.append(charAt);
             }
             i++;
         }
-        tokens.add(
-
-                trimToken(currentToken.toString(), tokenInQuotes));
+        tokens.add(trimToken(currentToken.toString(), charInQuotes));
         return tokens.toArray(new String[0]);
     }
 
