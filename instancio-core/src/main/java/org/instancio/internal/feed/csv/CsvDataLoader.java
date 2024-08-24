@@ -83,9 +83,9 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
                     }
                 }
             } else if (charAt == delimiter && !inQuotes) {
-                isQuotedToken = false;
                 tokens.add(unquote(currentToken.toString()));
                 currentToken.setLength(0);
+                isQuotedToken = false;
             } else if (charAt == ' ') {
                 if (inQuotes || (feedDataTrim == NONE && !isQuotedToken)) {
                     currentToken.append(charAt);
