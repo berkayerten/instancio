@@ -59,7 +59,6 @@ class FeedDataSourceAbsolutePathTest {
 
     @Test
     @DisabledOnOs(OS.WINDOWS)
-    @Disabled
     void feedSourceAnnotationWithAbsolutePath() {
         // Note: once created, the file will not be overwritten!
         final Path path = Instancio.gen().nio().path()
