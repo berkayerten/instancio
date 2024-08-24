@@ -21,6 +21,8 @@ import org.instancio.settings.FeedDataTrim;
 import org.instancio.settings.Keys;
 import org.instancio.settings.Settings;
 
+import static java.lang.String.format;
+
 public final class InternalCsvFormatOptions implements FormatOptionsProvider.FormatOptions {
 
     private final String commentPrefix;
@@ -41,7 +43,7 @@ public final class InternalCsvFormatOptions implements FormatOptionsProvider.For
 
     private char validateDelimiter(char delimiter) {
         if (delimiter == '"') {
-            throw new IllegalArgumentException("Invalid delimiter: " + delimiter);
+            throw new IllegalArgumentException(format("Invalid delimiter: %s", delimiter));
         }
         return delimiter;
     }
