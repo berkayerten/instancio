@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.instancio.settings.FeedDataTrim.NONE;
-import static org.instancio.settings.FeedDataTrim.UNQUOTED;
 
 /**
  * A very basic CSV parser does not support escape characters.
@@ -62,33 +61,33 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
         }
     }
 
-    @SuppressWarnings({"PMD.CyclomaticComplexity"})
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
     private String[] parseLine(String line) {
         List<String> tokens = new ArrayList<>();
         StringBuilder currentToken = new StringBuilder();
-        boolean charInQuotes = false;
-        boolean tokenQuoted = false;
+        boolean inQuotes = false;
+        boolean isQuotedToken = false;
         int i = 0;
         while (i < line.length()) {
             char charAt = line.charAt(i);
 
             if (charAt == '"') {
-                tokenQuoted = true;
-                if (charInQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                isQuotedToken = true;
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
                     currentToken.append(charAt);
                     i++;
                 } else {
-                    charInQuotes = !charInQuotes;
-                    if (charInQuotes) {
+                    inQuotes = !inQuotes;
+                    if (inQuotes) {
                         currentToken.setLength(0);
                     }
                 }
-            } else if (charAt == delimiter && !charInQuotes) {
-                tokenQuoted = false;
-                tokens.add(trimToken(currentToken.toString(), charInQuotes));
+            } else if (charAt == delimiter && !inQuotes) {
+                isQuotedToken = false;
+                tokens.add(unquote(currentToken.toString()));
                 currentToken.setLength(0);
             } else if (charAt == ' ') {
-                if (charInQuotes || (feedDataTrim == NONE && !tokenQuoted)) {
+                if (inQuotes || (feedDataTrim == NONE && !isQuotedToken)) {
                     currentToken.append(charAt);
                 }
             } else {
@@ -96,22 +95,16 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
             }
             i++;
         }
-        tokens.add(trimToken(currentToken.toString(), charInQuotes));
+
+        tokens.add(unquote(currentToken.toString()));
         return tokens.toArray(new String[0]);
     }
 
-    private String trimToken(String token, boolean tokenInQuotes) {
+    private String unquote(String token) {
         String result = token;
         if (result.isEmpty()) {
             return null;
         }
-        if (feedDataTrim == NONE) {
-            return result;
-        }
-        if (feedDataTrim == UNQUOTED && tokenInQuotes) {
-            result = result.trim();
-        }
-
         if (result.startsWith("\"") && result.endsWith("\"")) {
             result = result.substring(1, result.length() - 1);
         }

@@ -79,10 +79,10 @@ class FeedFormatCsvTest {
     @Test
     void markdownTable() {
         final String md = "\n" +
-                "| id | code | desc            |\n" +
-                "|----|------|-----------------|\n" +
-                "| 1  | ABC  | Great widget    |\n" +
-                "| 2  | FGH  | Awesome product |\n";
+                "| id | code | desc                |\n" +
+                "|----|------|---------------------|\n" +
+                "| 1  | ABC  | \"Great widget\"    |\n" +
+                "| 2  | FGH  | \"Awesome product\" |\n";
 
         final Feed result = ofFeed(Feed.class)
                 .withDataSource(source -> source.ofString(md))
