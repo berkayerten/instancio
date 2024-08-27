@@ -66,29 +66,29 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
         StringBuilder currentToken = new StringBuilder();
         boolean inQuotes = false;
         boolean isQuotedToken = false;
-        int i = 0;
-        while (i < line.length()) {
-            char charAt = line.charAt(i);
+        int index = 0;
+        while (index < line.length()) {
+            char currentChar = line.charAt(index);
 
-            if (charAt == '"') {
+            if (currentChar == '"') {
                 isQuotedToken = true;
-                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
-                    i++;
+                if (inQuotes && index + 1 < line.length() && line.charAt(index + 1) == '"') {
+                    index++;
                 } else {
                     inQuotes = !inQuotes;
                     resetToken(inQuotes, currentToken);
                 }
-            } else if (charAt == delimiter && !inQuotes) {
+            } else if (currentChar == delimiter && !inQuotes) {
                 tokens.add(trimToken(currentToken.toString(), isQuotedToken));
                 currentToken.setLength(0);
                 isQuotedToken = false;
-            } else if (charAt == ' ' && !inQuotes && isQuotedToken) {
+            } else if (currentChar == ' ' && !inQuotes && isQuotedToken) {
                 // leading whitespaces after quote are skipped
             } else {
-                currentToken.append(charAt);
+                currentToken.append(currentChar);
             }
-            i++;
-            if (i == line.length()) {
+            index++;
+            if (index == line.length()) {
                 tokens.add(trimToken(currentToken.toString(), isQuotedToken));
             }
         }
