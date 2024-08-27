@@ -24,7 +24,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.instancio.settings.FeedDataTrim.NONE;
+import static org.instancio.settings.FeedDataTrim.UNQUOTED;
 
 /**
  * A very basic CSV parser does not support escape characters.
@@ -60,8 +60,7 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
             return results;
         }
     }
-
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.EmptyControlStatement"})
     private String[] parseLine(String line) {
         List<String> tokens = new ArrayList<>();
         StringBuilder currentToken = new StringBuilder();
@@ -74,36 +73,45 @@ public final class CsvDataLoader implements DataLoader<List<String[]>> {
             if (charAt == '"') {
                 isQuotedToken = true;
                 if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
-                    currentToken.append(charAt);
                     i++;
                 } else {
                     inQuotes = !inQuotes;
-                    if (inQuotes) {
-                        currentToken.setLength(0);
-                    }
+                    resetToken(inQuotes, currentToken);
                 }
             } else if (charAt == delimiter && !inQuotes) {
-                tokens.add(unquote(currentToken.toString()));
+                tokens.add(trimToken(currentToken.toString(), isQuotedToken));
                 currentToken.setLength(0);
                 isQuotedToken = false;
-            } else if (charAt == ' ') {
-                if (inQuotes || (feedDataTrim == NONE && !isQuotedToken)) {
-                    currentToken.append(charAt);
-                }
+            } else if (charAt == ' ' && !inQuotes && isQuotedToken) {
+                // leading whitespaces after quote are skipped
             } else {
                 currentToken.append(charAt);
             }
             i++;
+            if (i == line.length()) {
+                tokens.add(trimToken(currentToken.toString(), isQuotedToken));
+            }
         }
 
-        tokens.add(unquote(currentToken.toString()));
         return tokens.toArray(new String[0]);
     }
 
-    private String unquote(String token) {
+    private void resetToken(boolean inQuotes, StringBuilder currentToken) {
+        if (inQuotes) {
+            currentToken.setLength(0);
+        }
+    }
+
+    private String trimToken(String token, boolean isQuotedToken) {
         String result = token;
         if (result.isEmpty()) {
             return null;
+        }
+        if (isQuotedToken) {
+            return result;
+        }
+        if (feedDataTrim == UNQUOTED) {
+            return result.trim();
         }
         if (result.startsWith("\"") && result.endsWith("\"")) {
             result = result.substring(1, result.length() - 1);
